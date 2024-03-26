@@ -17,6 +17,10 @@ import AddTransaction from "./components/AddTransaction.vue";
 
 
 import { ref, computed } from 'vue';
+import { useToast } from 'vue-toastification';
+
+
+const toast = useToast();
 
 const transactions = ref([
     { id: 1, text: 'Flower', amount: -10.99 },
@@ -42,8 +46,18 @@ const expenses = computed(() => {
         return acc + transaction.amount
     }, 0).toFixed(2);
 });
+const generateId = () => {
+    return Math.floor(Math.random() * 1000000);
+}
 
-const handleTransactionSubmitted = () => {
+const handleTransactionSubmitted = (transactionData) => {
+    transactions.value.push({
+        id: generateId(),
+        text: transactionData.text,
+        amount: transactionData.amount
+    })
+    toast.success('Transaction Added Successfully')
+
 
 }
 
