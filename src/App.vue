@@ -16,18 +16,21 @@ import TransactionList from "./components/TransactionList.vue";
 import AddTransaction from "./components/AddTransaction.vue";
 
 
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useToast } from 'vue-toastification';
 
 
 const toast = useToast();
 
-const transactions = ref([
-    { id: 1, text: 'Flower', amount: -10.99 },
-    { id: 2, text: 'Bike', amount: 50.99 },
-    { id: 3, text: 'Laptop', amount: -2000 },
-    { id: 4, text: 'Web Work', amount: 5000 }
-]);
+const transactions = ref([]);
+
+onMounted(() => {
+    const savedTransactions = JSON.parse(localStorage.getItem('transactions'));
+
+    if (savedTransactions) {
+        transactions.value = savedTransactions;
+    }
+})
 
 const totalAmount = computed(() => {
     return transactions.value.reduce((acc, transaction) => {
@@ -51,20 +54,40 @@ const generateId = () => {
 }
 
 const handleTransactionSubmitted = (transactionData) => {
-    transactions.value.push({
+    const newTransactionData = {
         id: generateId(),
         text: transactionData.text,
         amount: transactionData.amount
-    })
-    toast.success('Transaction Added Successfully')
-}
+    };
+
+    transactions.value.push(newTransactionData);
+
+    const storedTransactions = JSON.parse(localStorage.getItem('transactions')) || [];
+
+    storedTransactions.push(newTransactionData);
+
+    localStorage.setItem('transactions', JSON.stringify(storedTransactions));
+
+    toast.success('Transaction Added Successfully');
+};
+
 
 const handleTransactionDelete = (id) => {
     const index = transactions.value.findIndex((transaction) => transaction.id === id);
     if (index !== -1) {
         transactions.value.splice(index, 1);
+
+        // Retrieve existing transactions from local storage or initialize as an empty array
+        const storedTransactions = JSON.parse(localStorage.getItem('transactions'))
+        const storedIndex = storedTransactions.findIndex((transaction) => transaction.id === id);
+
+        if (storedIndex !== -1) {
+            storedTransactions.splice(storedIndex, 1);
+            localStorage.setItem('transactions', JSON.stringify(storedTransactions));
+        }
+
         toast.success('Transaction Deleted');
     }
-}
+};
 
 </script>
