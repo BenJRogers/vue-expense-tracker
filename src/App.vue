@@ -3,7 +3,7 @@
     <div class="container">
         <Balance :totalAmount="+totalAmount" />
         <IncomeExpenses :income="+income" :expenses="+expenses" />
-        <TransactionList :transactions="transactions" />
+        <TransactionList @transactionDeleted="handleTransactionDelete" :transactions="transactions" />
         <AddTransaction @transactionSubmitted="handleTransactionSubmitted" />
     </div>
 </template>
@@ -57,8 +57,14 @@ const handleTransactionSubmitted = (transactionData) => {
         amount: transactionData.amount
     })
     toast.success('Transaction Added Successfully')
+}
 
-
+const handleTransactionDelete = (id) => {
+    const index = transactions.value.findIndex((transaction) => transaction.id === id);
+    if (index !== -1) {
+        transactions.value.splice(index, 1);
+        toast.success('Transaction Deleted');
+    }
 }
 
 </script>
